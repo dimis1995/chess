@@ -35,11 +35,14 @@ def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
         print("error, new position out of bounds")
         return
     if type(piece) == Pawn:
-        if -100 >= block_to_be_populated.y - piece.board_block.y >= 100:
+        if block_to_be_populated.y - piece.board_block.y > 100 \
+                or block_to_be_populated.y - piece.board_block.y < -100:
             print("something's fishy here")
             return
         else:
-            if block_to_be_populated.has_chess_piece and -100 < block_to_be_populated.x - piece.board_block.x < 100:
+            if block_to_be_populated.has_chess_piece and \
+                    (block_to_be_populated.x - piece.board_block.x < 100 or
+                     block_to_be_populated.x - piece.board_block.x > -100):
                 print("going in for the kill it seems")
                 dead_piece_walking = get_piece(pieces, (block_to_be_populated.x + 30, block_to_be_populated.y + 30))
                 if not dead_piece_walking:
@@ -59,12 +62,13 @@ def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
             elif -100 > block_to_be_populated.x - piece.board_block.x > 100:
                 print("way out of x bounds to move")
             else:
-                print("everything seems fine")
-                piece.board_block.has_chess_piece = False
-                block_to_be_populated.has_chess_piece = True
-                piece.board_block = block_to_be_populated
-                piece.x = piece.board_block.x + 25
-                piece.y = piece.board_block.y + 25
+                if piece.white:
+                    print("everything seems fine")
+                    piece.board_block.has_chess_piece = False
+                    block_to_be_populated.has_chess_piece = True
+                    piece.board_block = block_to_be_populated
+                    piece.x = piece.board_block.x + 25
+                    piece.y = piece.board_block.y + 25
 
 
 
