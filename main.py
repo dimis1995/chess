@@ -1,5 +1,4 @@
 import pygame
-import numpy as np
 
 from pieces import Piece, Pawn, Knight, Rook, Bishop, Queen, King, Block
 
@@ -48,7 +47,8 @@ def check_pawn_rules(piece: Piece, pieces: [], grid: [], block_to_be_populated: 
             elif block_to_be_populated.x == piece.board_block.x:
                 print("you can't kill a piece in front of you")
                 return False
-            elif block_to_be_populated.x - piece.board_block.x > 150 or block_to_be_populated.x - piece.board_block.x < -150:
+            elif block_to_be_populated.x - piece.board_block.x > 150 or \
+                    block_to_be_populated.x - piece.board_block.x < -150:
                 print("x axis too far movement")
                 return False
             else:
@@ -73,6 +73,39 @@ def check_pawn_rules(piece: Piece, pieces: [], grid: [], block_to_be_populated: 
             return True
 
 
+def check_knight_rules(piece: Piece, pieces: [], grid: [], block_to_be_populated: Block):
+    available_move_set = []
+    x = piece.board_block.x
+    y = piece.board_block.y
+    available_move_set.append((x+100, y-200))
+    available_move_set.append((x+200, y-100))
+    available_move_set.append((x+200, y+100))
+    available_move_set.append((x+100, y+200))
+    available_move_set.append((x-100, y+200))
+    available_move_set.append((x-200, y+100))
+    available_move_set.append((x-200, y-100))
+    available_move_set.append((x-100, y-200))
+
+    if (block_to_be_populated.x, block_to_be_populated.y) in available_move_set:
+        if block_to_be_populated.has_chess_piece:
+            dead_piece_walking = get_piece(pieces, (block_to_be_populated.x + 30, block_to_be_populated.y + 30))
+            if not dead_piece_walking:
+                print("something unexpected happened")
+                return False
+            if dead_piece_walking.white == piece.white:
+                print("pieces of same color can't kill each other")
+                return False
+            else:
+                remove_piece(pieces, dead_piece_walking)
+                print("piece killed: " + str(dead_piece_walking))
+                return True
+        else:
+            return True
+    else:
+        print("knight can't make that move")
+        return False
+
+
 def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
     block_to_be_populated: Block
     block_to_be_populated = get_block(grid, new_pos)
@@ -88,7 +121,15 @@ def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
             piece.y = piece.board_block.y + 25
         else:
             print("move failed, check error log")
-
+    elif type(piece) == Knight:
+        if check_knight_rules(piece, pieces, grid, block_to_be_populated):
+            piece.board_block.has_chess_piece = False
+            block_to_be_populated.has_chess_piece = True
+            piece.board_block = block_to_be_populated
+            piece.x = piece.board_block.x + 25
+            piece.y = piece.board_block.y + 25
+        else:
+            print("move failed, check error log")
 
 def main():
     pygame.init()
@@ -218,5 +259,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
