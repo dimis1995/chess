@@ -28,6 +28,48 @@ def remove_piece(pieces: [], piece_to_die: Piece):
             column.remove(piece_to_die)
 
 
+def check_pawn_rules(piece: Piece, pieces: [], grid: [], block_to_be_populated: Block):
+    if block_to_be_populated.y - piece.board_block.y > 100 \
+            or block_to_be_populated.y - piece.board_block.y < -100:
+        print("something's fishy here")
+        return False
+    else:
+        if block_to_be_populated.has_chess_piece and \
+                (block_to_be_populated.x - piece.board_block.x < 100 or
+                 block_to_be_populated.x - piece.board_block.x > -100):
+            print("going in for the kill it seems")
+            dead_piece_walking = get_piece(pieces, (block_to_be_populated.x + 30, block_to_be_populated.y + 30))
+            if not dead_piece_walking:
+                print("error, block should had a chess piece on it, but it doesnt")
+                return False
+            elif dead_piece_walking.white == piece.white:
+                print("pieces of same color can't kill each other")
+                return False
+            elif block_to_be_populated.x == piece.board_block.x:
+                print("you can't kill a piece in front of you")
+                return False
+            else:
+                if piece.white and block_to_be_populated.y < piece.board_block.y:
+                    print("pawn can't move backwards")
+                    return False
+                elif not piece.white and block_to_be_populated.y > piece.board_block.y:
+                    print("pawn can't move backwards")
+                    return False
+                remove_piece(pieces, dead_piece_walking)
+                print("piece killed : " + str(dead_piece_walking))
+                return True
+        elif block_to_be_populated.x != piece.board_block.x:
+            print("way out of x bounds to move")
+        else:
+            if piece.white and block_to_be_populated.y < piece.board_block.y:
+                print("pawn can't move backwards")
+                return False
+            elif not piece.white and block_to_be_populated.y > piece.board_block.y:
+                print("pawn can't move backwards")
+                return False
+            return True
+
+
 def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
     block_to_be_populated: Block
     block_to_be_populated = get_block(grid, new_pos)
@@ -35,96 +77,14 @@ def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
         print("error, new position out of bounds")
         return
     if type(piece) == Pawn:
-        if block_to_be_populated.y - piece.board_block.y > 100 \
-                or block_to_be_populated.y - piece.board_block.y < -100:
-            print("something's fishy here")
-            return
+        if check_pawn_rules(piece, pieces, grid, block_to_be_populated):
+            piece.board_block.has_chess_piece = False
+            block_to_be_populated.has_chess_piece = True
+            piece.board_block = block_to_be_populated
+            piece.x = piece.board_block.x + 25
+            piece.y = piece.board_block.y + 25
         else:
-            if block_to_be_populated.has_chess_piece and \
-                    (block_to_be_populated.x - piece.board_block.x < 100 or
-                     block_to_be_populated.x - piece.board_block.x > -100):
-                print("going in for the kill it seems")
-                dead_piece_walking = get_piece(pieces, (block_to_be_populated.x + 30, block_to_be_populated.y + 30))
-                if not dead_piece_walking:
-                    print("error, block should had a chess piece on it, but it doesnt")
-                    return
-                elif dead_piece_walking.white == piece.white:
-                    print("pieces of same color can't kill each other")
-                    return
-                elif block_to_be_populated.x == piece.board_block.x:
-                    print("you can't kill a piece in front of you")
-                    return
-                else:
-                    if piece.white and block_to_be_populated.y < piece.board_block.y:
-                        print("pawn can't move backwards")
-                        return
-                    elif not piece.white and block_to_be_populated.y > piece.board_block.y:
-                        print("pawn can't move backwards")
-                        return
-                    remove_piece(pieces, dead_piece_walking)
-                    print("piece killed : " + str(dead_piece_walking))
-                    piece.board_block.has_chess_piece = False
-                    block_to_be_populated.has_chess_piece = True
-                    piece.board_block = block_to_be_populated
-                    piece.x = piece.board_block.x + 25
-                    piece.y = piece.board_block.y + 25
-            elif block_to_be_populated.x != piece.board_block.x:
-                print("way out of x bounds to move")
-            else:
-                if piece.white and block_to_be_populated.y < piece.board_block.y:
-                    print("pawn can't move backwards")
-                    return
-                elif not piece.white and block_to_be_populated.y > piece.board_block.y:
-                    print("pawn can't move backwards")
-                    return
-                print("everything seems fine")
-                piece.board_block.has_chess_piece = False
-                block_to_be_populated.has_chess_piece = True
-                piece.board_block = block_to_be_populated
-                piece.x = piece.board_block.x + 25
-                piece.y = piece.board_block.y + 25
-
-
-
-    # if type(piece) == Pawn:
-    #     block_to_be_populated: Block
-    #     try:
-    #         np_grid = np.array(grid)
-    #         solution = np.argwhere(np_grid == piece.board_block)
-    #         column = solution[0][0]
-    #         row = solution[0][1]
-    #         if piece.white:
-    #             block_to_be_populated = grid[column][row+1]
-    #             if block_to_be_populated.has_chess_piece:
-    #                 dead_piece_walking = get_piece(pieces, ((column * 100) + 50, ((row + 1) * 100) + 50))
-    #                 print("piece to be deleted: " + str(dead_piece_walking))
-    #                 if piece.white == dead_piece_walking.white:
-    #                     print("pieces of same color can't kill each other")
-    #                     return
-    #                 remove_piece(pieces, dead_piece_walking)
-    #         else:
-    #             block_to_be_populated = grid[column][row - 1]
-    #             if block_to_be_populated.has_chess_piece:
-    #                 dead_piece_walking = get_piece(pieces, ((column * 100) + 50, ((row - 1) * 100) + 50))
-    #                 print("piece to be deleted: " + str(dead_piece_walking))
-    #                 if piece.white == dead_piece_walking.white:
-    #                     print("pieces of same color can't kill each other")
-    #                     return
-    #                 remove_piece(pieces, dead_piece_walking)
-    #     except IndexError:
-    #         print("Pawn can't move out of map bounds")
-    #         return
-    #     if piece.white:
-    #         piece.y += 100
-    #     else:
-    #         piece.y -= 100
-    #     piece.board_block.has_chess_piece = False
-    #     piece.board_block = block_to_be_populated
-    #     piece.board_block.has_chess_piece = True
-    # elif type(piece) == Knight:
-    #     piece.y += 100
-    # piece.draw(screen)
-    # pygame.display.update()
+            print("move failed, check error log")
 
 
 def main():
@@ -238,21 +198,17 @@ def main():
                 piece = get_piece(pieces, pygame.mouse.get_pos())
                 print("mouse position: " + str(pygame.mouse.get_pos()))
                 if piece and not piece_selected:
-                    # move(piece, pieces, grid)
-                    print("Piece selected: Select a new position to move it")
+                    print("Piece selected: " + str(piece))
                     piece_selected = piece
+                    piece.board_block.is_selected = True
                 elif piece_selected:
                     move(piece_selected, pieces, grid, pygame.mouse.get_pos())
+                    piece_selected.board_block.is_selected = False
                     piece_selected = None
                 else:
                     print("no piece in this position")
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_j:
-                    print("CTRL PRESSED")
-                    piece = pieces[1][1]
-                    move(piece, pieces, grid)
-                    print(piece)
-                elif event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE:
                     print(pieces)
         pygame.display.update()
 

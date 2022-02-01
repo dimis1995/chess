@@ -6,6 +6,7 @@ class Block:
     y: int
     has_chess_piece: bool
     color: [int, int, int]
+    is_selected: bool = False
 
     def __init__(self, x, y, piece, color: [int, int, int]):
         self.x = x
@@ -20,7 +21,9 @@ class Block:
         return "Block: " + str(self.x) + "," + str(self.y)
 
     def draw(self, surface):
-        if self.has_chess_piece:
+        if self.has_chess_piece and self.is_selected:
+            pygame.draw.rect(surface, [0, 255, 0], pygame.Rect(self.x, self.y, 100, 100))
+        elif self.has_chess_piece:
             pygame.draw.rect(surface, [255, 0, 0], pygame.Rect(self.x, self.y, 100, 100))
         else:
             pygame.draw.rect(surface, self.color, pygame.Rect(self.x, self.y, 100, 100))
