@@ -30,7 +30,7 @@ def remove_piece(pieces: [], piece_to_die: Piece):
 def check_pawn_rules(piece: Piece, pieces: [], grid: [], block_to_be_populated: Block):
     if block_to_be_populated.y - piece.board_block.y > 100 \
             or block_to_be_populated.y - piece.board_block.y < -100:
-        print("something's fishy here")
+        print("pawn can't move across multiple spaces")
         return False
     else:
         if block_to_be_populated.has_chess_piece and \
@@ -106,30 +106,69 @@ def check_knight_rules(piece: Piece, pieces: [], grid: [], block_to_be_populated
         return False
 
 
+def get_all_blocks_between(block1: Block, block2: Block, grid: []):
+    blocks_between = []
+    if block1.x == block2.x and block1.y != block2.y:
+        # vertical movement
+        for column in grid:
+            for block in column:
+                if block.x == block1.x and (block1.y < block.y < block2.y or block2.y < block.y < block1.y):
+                    blocks_between.append(block)
+    elif block1.x != block2.x and block1.y == block2.y:
+        for column in grid:
+            for block in column:
+                if block.y == block1.y and (block1.x < block.x < block2.x or block2.x < block.x < block1.x):
+                    blocks_between.append(block)
+    return blocks_between
+
+
+def check_rook_rules(piece, pieces, grid, block_to_be_populated):
+    if (piece.board_block.x == block_to_be_populated.x and piece.board_block.y != block_to_be_populated.y)\
+            or (piece.board_block.y == block_to_be_populated.y and piece.board_block.x != block_to_be_populated.x):
+        blocks_in_between = get_all_blocks_between(piece.board_block, block_to_be_populated, grid)
+        for block in blocks_in_between:
+            if block.has_chess_piece:
+                print("colliding with block: " + str(block))
+                return False
+        if block_to_be_populated.has_chess_piece:
+            dead_piece_walking = get_piece(pieces, (block_to_be_populated.x + 30, block_to_be_populated.y + 30))
+            if dead_piece_walking.white == piece.white:
+                print("pieces of same color can't kill each other")
+                return False
+            else:
+                remove_piece(pieces, dead_piece_walking)
+                print("piece killed: " + str(dead_piece_walking))
+                return True
+        else:
+            return True
+    else:
+        print("rooks can't move diagonally")
+        return False
+
+
 def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
     block_to_be_populated: Block
     block_to_be_populated = get_block(grid, new_pos)
+    check: bool = False
     if not block_to_be_populated:
         print("error, new position out of bounds")
         return
-    if type(piece) == Pawn:
-        if check_pawn_rules(piece, pieces, grid, block_to_be_populated):
-            piece.board_block.has_chess_piece = False
-            block_to_be_populated.has_chess_piece = True
-            piece.board_block = block_to_be_populated
-            piece.x = piece.board_block.x + 25
-            piece.y = piece.board_block.y + 25
-        else:
-            print("move failed, check error log")
-    elif type(piece) == Knight:
-        if check_knight_rules(piece, pieces, grid, block_to_be_populated):
-            piece.board_block.has_chess_piece = False
-            block_to_be_populated.has_chess_piece = True
-            piece.board_block = block_to_be_populated
-            piece.x = piece.board_block.x + 25
-            piece.y = piece.board_block.y + 25
-        else:
-            print("move failed, check error log")
+    if type(piece) == Pawn and check_pawn_rules(piece, pieces, grid, block_to_be_populated):
+        check = True
+    elif type(piece) == Knight and check_knight_rules(piece, pieces, grid, block_to_be_populated):
+        check = True
+    elif type(piece) == Rook and check_rook_rules(piece, pieces, grid, block_to_be_populated):
+        check = True
+    else:
+        print("error, see error log")
+        return
+    if check:
+        piece.board_block.has_chess_piece = False
+        block_to_be_populated.has_chess_piece = True
+        piece.board_block = block_to_be_populated
+        piece.x = piece.board_block.x + 25
+        piece.y = piece.board_block.y + 25
+
 
 def main():
     pygame.init()
