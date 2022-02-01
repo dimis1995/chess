@@ -48,10 +48,19 @@ def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
                 if not dead_piece_walking:
                     print("error, block should had a chess piece on it, but it doesnt")
                     return
-                if dead_piece_walking.white == piece.white:
+                elif dead_piece_walking.white == piece.white:
                     print("pieces of same color can't kill each other")
                     return
+                elif block_to_be_populated.x == piece.board_block.x:
+                    print("you can't kill a piece in front of you")
+                    return
                 else:
+                    if piece.white and block_to_be_populated.y < piece.board_block.y:
+                        print("pawn can't move backwards")
+                        return
+                    elif not piece.white and block_to_be_populated.y > piece.board_block.y:
+                        print("pawn can't move backwards")
+                        return
                     remove_piece(pieces, dead_piece_walking)
                     print("piece killed : " + str(dead_piece_walking))
                     piece.board_block.has_chess_piece = False
@@ -59,16 +68,21 @@ def move(piece: Piece, pieces: [], grid: [], new_pos: (int, int)):
                     piece.board_block = block_to_be_populated
                     piece.x = piece.board_block.x + 25
                     piece.y = piece.board_block.y + 25
-            elif -100 > block_to_be_populated.x - piece.board_block.x > 100:
+            elif block_to_be_populated.x != piece.board_block.x:
                 print("way out of x bounds to move")
             else:
-                if piece.white:
-                    print("everything seems fine")
-                    piece.board_block.has_chess_piece = False
-                    block_to_be_populated.has_chess_piece = True
-                    piece.board_block = block_to_be_populated
-                    piece.x = piece.board_block.x + 25
-                    piece.y = piece.board_block.y + 25
+                if piece.white and block_to_be_populated.y < piece.board_block.y:
+                    print("pawn can't move backwards")
+                    return
+                elif not piece.white and block_to_be_populated.y > piece.board_block.y:
+                    print("pawn can't move backwards")
+                    return
+                print("everything seems fine")
+                piece.board_block.has_chess_piece = False
+                block_to_be_populated.has_chess_piece = True
+                piece.board_block = block_to_be_populated
+                piece.x = piece.board_block.x + 25
+                piece.y = piece.board_block.y + 25
 
 
 
