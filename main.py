@@ -48,6 +48,9 @@ def check_pawn_rules(piece: Piece, pieces: [], grid: [], block_to_be_populated: 
             elif block_to_be_populated.x == piece.board_block.x:
                 print("you can't kill a piece in front of you")
                 return False
+            elif block_to_be_populated.x - piece.board_block.x > 150 or block_to_be_populated.x - piece.board_block.x < -150:
+                print("x axis too far movement")
+                return False
             else:
                 if piece.white and block_to_be_populated.y < piece.board_block.y:
                     print("pawn can't move backwards")
